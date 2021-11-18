@@ -3,6 +3,7 @@ package practic181121;
 import practic161121.Currency;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.net.URI;
 import java.time.LocalDate;
@@ -32,8 +33,9 @@ public class RssCourseAnalyzer {
         Double res = 0.0;
         //
         String adr = baseAdr + date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        XMLStreamReader reader = null;
         try {
-            XMLStreamReader reader = XMLInputFactory.newFactory().createXMLStreamReader(
+            reader = XMLInputFactory.newFactory().createXMLStreamReader(
                     URI.create(adr).toURL().openStream()
             );
 
@@ -70,6 +72,12 @@ public class RssCourseAnalyzer {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (XMLStreamException e) {
+                e.printStackTrace();
+            }
         }
 
 

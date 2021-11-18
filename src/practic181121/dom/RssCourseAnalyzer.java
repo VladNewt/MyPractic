@@ -1,9 +1,16 @@
 package practic181121.dom;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import practic161121.Currency;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -30,43 +37,67 @@ public class RssCourseAnalyzer {
 
     public double courseOnDate(LocalDate date, Currency currency) {
         Double res = 0.0;
-        //
         String adr = baseAdr + date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        boolean rightCurrency = false;
+
         try {
-            XMLStreamReader reader = XMLInputFactory.newFactory().createXMLStreamReader(
-                    URI.create(adr).toURL().openStream()
-            );
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(adr);
+            doc.normalizeDocument();
+
+            Node root = doc.getDocumentElement();
+
+            NodeList childNodes = root.getChildNodes();
+
+            Node node;
+
+            //1
+//            for (int i = 0; i < childNodes.getLength(); i++) {
+//                node = childNodes.item(i);
+//                for(int j = 0; j < node.getChildNodes().getLength();j++) {
+//                    NodeList data = node.getChildNodes();
+//                    if (node.getNodeName().equals("CharCode") && data.item(j).getTextContent().equals(currency.name())) {
+//                        rightCurrency=true;
+//
+//                    } else if (rightCurrency && node.getNodeName().equals("Value")) {
+//                        res = Double.parseDouble(node.getTextContent().replace(',','.'));
+//                        rightCurrency = false;
+//                        i = childNodes.getLength();
+//                        break;
+//                    }
+//                }
+//            }
 
 
-            boolean rightCurrency = false;
-            int event = reader.getEventType();
+            //2
+            Node valute = root.getFirstChild();
+            Node data;
 
-            while (true) {
-                switch (event) {
-                    case START_ELEMENT:
-                        if (reader.getName().getLocalPart().equals("CharCode")) {
-                            event = reader.next();
-                            if (reader.isWhiteSpace()) continue;
-                            if (reader.getText().equals(Currency.USD.name()))
-                                rightCurrency = true;
+            while (valute!=null) {
+                data = valute.getFirstChild();
+                while (data!=null && !rightCurrency) {
 
-                        } else if (rightCurrency && reader.getName().getLocalPart().equals("Value")) {
-                            event = reader.next();
-                            if (reader.isWhiteSpace()) continue;
-                            res = Double.parseDouble(reader.getText().replace(',', '.'));
-                            rightCurrency = false;
-                        }
-
+                    if(data.getNodeName().equals("CharCode") && 
+                            data.getTextContent().equals(currency.name())) {
+                        rightCurrency=true;
+                    } else if (rightCurrency && data.getNodeName().equals("Value")) {
+                        res = Double.parseDouble(data.getTextContent()
+                            .replace(',','.'));
                         break;
+                    }
 
+
+                    data=data.getNextSibling();
                 }
-                //Проверка на наличие следующего элемента
-                if (!reader.hasNext())
-                    break;
-                event = reader.next();
 
 
+                valute = valute.getNextSibling();
             }
+
+
+
+
+
+
 
         } catch (Exception e) {
             e.printStackTrace();
