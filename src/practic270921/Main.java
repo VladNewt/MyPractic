@@ -14,11 +14,11 @@ public class Main {
         System.out.println("u2 = " + u2);
         System.out.println(u1.equals(u2));
 
-        Container<User> c1 = new Container<User>(u1);
-        Container<User> c2 = c1.clone();
-        c1.getVal().setName("222");
-        System.out.println("c1 = " + c1);
-        System.out.println("c2 = "+ c2);
+//        Container<User> c1 = new Container<User>(u1);
+//        Container<User> c2 = c1.clone();
+//        c1.getVal().setName("222");
+//        System.out.println("c1 = " + c1);
+//        System.out.println("c2 = "+ c2);
 
 
 
